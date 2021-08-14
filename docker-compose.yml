@@ -7,6 +7,8 @@ services:
       - private
   sut:
     build: ./sut
+    ports:
+      - "8080:8080"
     networks:
       - private
   
