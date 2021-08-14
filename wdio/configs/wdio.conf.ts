@@ -54,14 +54,24 @@ export const config: WebdriverIO.Config = {
         // maxInstances can get overwritten per capability. So if you have an in-house Selenium
         // grid with only 5 firefox instances available you can make sure that not more than
         // 5 instances get started at a time.
-        maxInstances: 5,
+        maxInstances: 1,
         //
         browserName: 'chrome',
-        acceptInsecureCerts: true
+        acceptInsecureCerts: true,
         // If outputDir is provided WebdriverIO can capture driver session logs
         // it is possible to configure which logTypes to include/exclude.
         // excludeDriverLogs: ['*'], // pass '*' to exclude all driver session logs
         // excludeDriverLogs: ['bugreport', 'server'],
+        // For docker https://webdriver.io/docs/docker/
+        'goog:chromeOptions': {
+            args: [
+                '--no-sandbox',
+                '--disable-infobars',
+                '--headless',
+                '--disable-gpu',
+                '--window-size=1440,735',
+            ],
+        }
     }],
     //
     // ===================
@@ -110,7 +120,16 @@ export const config: WebdriverIO.Config = {
     // Services take over a specific job you don't want to take care of. They enhance
     // your test setup with almost no effort. Unlike plugins, they don't add new
     // commands. Instead, they hook themselves up into the test process.
-    services: ['chromedriver'],
+    services: [
+        // Need Java in Docker container, mendokusai!
+        // https://stackoverflow.com/questions/64478927/error-not-found-java-when-running-webdriver-io-test
+        // 2021-08-14T07:07:26.224Z ERROR @wdio/selenium-standalone-service: Error: not found: java
+        // ['selenium-standalone', {
+        //     drivers: {
+        //         chrome: true,
+        //     }
+        // }]
+    ],
     
     // Framework you want to run your specs with.
     // The following are supported: Mocha, Jasmine, and Cucumber
@@ -134,7 +153,10 @@ export const config: WebdriverIO.Config = {
     // see also: https://webdriver.io/docs/dot-reporter
     reporters: ['spec'],
 
-
+    hostname: 'selenium-server',
+    port: 4444,
+    path: '/wd/hub/',
+    protocol: 'http',
     
     //
     // Options to be passed to Mocha.

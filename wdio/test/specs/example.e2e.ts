@@ -1,8 +1,14 @@
-describe('Confirm Autify pricing', () => {
-    it('should open pricing page', async () => {
-        await browser.url('https://autify.com/')
+describe('example.com', () => {
+    it('should open remote example.com', async () => {
+        await browser.url('http://example.com/')
+        const actual = await browser.getUrl()
+        await expect(actual).toEqual('http://example.com/')
+    });
 
-        const link = await browser.$('=Pricing')
-        await expect(await link.getAttribute('href')).toEqual('/pricing')
+    it('should open local example.com in same network', async () => {
+        const url = 'http://sut-in-local:8080/example'
+        await browser.url(url)
+        const actual = await browser.getUrl()
+        await expect(actual).toEqual(url)
     });
 });

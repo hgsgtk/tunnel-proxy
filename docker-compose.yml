@@ -4,22 +4,43 @@ services:
   tunnel-proxy:
     build: ./proxy
     networks: 
-      - private
+      private:
   sut:
     build: ./sut
     ports:
       - "8080:8080"
     networks:
-      - private
+      private:
   
-  # selenium hub / nodes
+  # alternative https://webdriver.io/docs/selenium-standalone-service/
+  # but to simplify Dockerfiel for wdio
   selenium-server:
     ## ref: https://github.com/SeleniumHQ/docker-selenium#standalone
     image: selenium/standalone-chrome:4.0.0-rc-1-prerelease-20210804
     ports:
       - "4444:4444"
     networks: 
-      - cloud    
+      cloud:
+  
+  wdio:
+    build: ./wdio
+    volumes:
+      - ./wdio:/app:cached
+    # without depends_on, it cannot resolve host name when using docker-compose run. 
+    # [0-0] 2021-08-14T07:35:46.029Z ERROR webdriver: RequestError: getaddrinfo ENOTFOUND selenium-server
+    depends_on: 
+      - selenium-server
+      - sut-in-local
+    networks: 
+      cloud:
+
+  # To testing in local
+  sut-in-local:
+    build: ./sut
+    ports:
+      - "8001:8080"
+    networks:
+      cloud:
 
 networks:
   cloud:
