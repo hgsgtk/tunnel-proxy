@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "*": [ "./*" ],
+            "test/*": ["./test/specs/*"]
+        },
+        "types": ["node", "webdriverio/async", "@wdio/sync", "@wdio/mocha-framework", "expect-webdriverio"]
+    },
+    "include": [
+        "./test/specs/**/*.ts", 
+    ]
+}
