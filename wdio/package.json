@@ -3,7 +3,8 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
-        "wdio": "wdio run ./entrypoint.js --no-autoCompileOpts.autoCompile",
+        "wdioPublicOrLocal": "wdio run ./entrypoint.js --no-autoCompileOpts.autoCompile --spec example.e2e.ts",
+        "wdioPrivate": "wdio run ./entrypoint.js --no-autoCompileOpts.autoCompile --spec private.e2e.ts",
         "chromedriver": "npx chromedriver"
     },
     "devDependencies": {

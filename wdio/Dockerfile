@@ -5,5 +5,3 @@ WORKDIR /app
 ADD . /app
 
 RUN yarn install
-
-CMD yarn run wdio

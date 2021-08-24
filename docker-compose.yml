@@ -5,7 +5,7 @@ services:
     build: ./proxy
     networks: 
       private:
-  sut:
+  sut-in-private:
     build: ./sut
     ports:
       - "8080:8080"
@@ -13,12 +13,14 @@ services:
       private:
   
   # alternative https://webdriver.io/docs/selenium-standalone-service/
-  # but to simplify Dockerfiel for wdio
+  # but to simplify Dockerfile for wdio
   selenium-server:
     ## ref: https://github.com/SeleniumHQ/docker-selenium#standalone
     image: selenium/standalone-chrome:4.0.0-rc-1-prerelease-20210804
     ports:
       - "4444:4444"
+    # https://stackoverflow.com/questions/30210362/how-to-increase-the-size-of-the-dev-shm-in-docker-container
+    shm_size: "2g"
     networks: 
       cloud:
   

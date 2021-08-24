@@ -11,14 +11,20 @@ You can set up testing environment by docker-compose.
 docker-compose up
 ```
 
-Run webdriverio test by docker container
+Run webdriverio tests against SUT in public internet or local network which is accessible from the test execution environment.
 
 ```
-docker-compose run wdio
+docker-compose run wdio yarn run wdioPublicOrLocal
+```
+
+Run webdriverio tests against SUT in private network which is not accessible from the test execution environment.
+
+```
+docker-compose run wdio yarn run wdioPrivate
 ```
 
 ## What is it ?
-### Test in local or public system is easy
+### Test in local or public network is easy
 
 For example, there are two tests.
 
@@ -57,3 +63,36 @@ wdio_1             |
 wdio_1             |
 wdio_1             | Spec Files:	 1 passed, 1 total (100% completed) in 00:00:13
 ```
+
+### A problem to test in private network which is not accessible from the test execution system
+
+For example, there is one test.
+
+```
+describe('example.com', () => {
+    it('should open private example.com in different network', async () => {
+        const url = 'http://sut-in-private:8080/example'
+        await browser.url(url)
+        const actual = await browser.getUrl()
+        await expect(actual).toEqual(url)
+    });
+});
+```
+
+The hostname `sut-in-private` is not accessible from the test execution system, because it is a different docker network.
+
+```
+$ docker-compose run wdio yarn run wdioPrivate
+
+...(omit)
+
+[0-0] 2021-08-24T19:45:35.612Z INFO webdriver: DATA { url: 'http://sut-in-private:8080/example' }
+[0-0] 2021-08-24T19:45:35.641Z ERROR webdriver: Request failed with status 500 due to unknown error: unknown error: net::ERR_NAME_NOT_RESOLVED
+[0-0]   (Session info: headless chrome=92.0.4515.131)
+
+...(omit)
+```
+
+Without any solution, we got the following error.
+
+> Request failed with status 500 due to unknown error: unknown error: net::ERR_NAME_NOT_RESOLVED
