@@ -1,0 +1,12 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "wstunnel": "mhzed/wstunnel"
+  },
+  "scripts": {
+    "server": "wstunnel -s 0.0.0.0:3330 -t sut-in-private:8000"
+  }
+}

@@ -1,17 +1,31 @@
 version: "3.9"
 
 services:
-  tunnel-proxy:
-    build: ./proxy
-    networks: 
-      private:
+  #######
+  # private environment which is not accessible from external network
+  #######
   sut-in-private:
     build: ./sut
     ports:
       - "8080:8080"
     networks:
       private:
-  
+
+  # to proxy request by handling incoming webhook event
+  # launch "wstunnel server" to welcome http request to SUT
+  wstunnel-in-private:
+    build: ./wstunnel/server
+    depends_on:
+      - sut-in-private
+    ports:
+      - "3330:3330"
+    networks:
+      private:
+
+
+  #######
+  # cloud environment which is out of private network
+  #######
   # alternative https://webdriver.io/docs/selenium-standalone-service/
   # but to simplify Dockerfile for wdio
   selenium-server:
@@ -23,7 +37,25 @@ services:
     shm_size: "2g"
     networks: 
       cloud:
-  
+
+  # To testing in local (cloud)
+  sut-in-cloud:
+    build: ./sut
+    ports:
+      - "8001:8080"
+    networks:
+      cloud:
+
+  # to establish websocket tunnel
+  wstunnel-in-cloud:
+    build: ./wstunnel/client
+    depends_on:
+      - wstunnel-in-private # another network
+    ports:
+      - "3331:3331"
+    networks:
+      cloud:
+
   wdio:
     build: ./wdio
     volumes:
@@ -32,17 +64,11 @@ services:
     # [0-0] 2021-08-14T07:35:46.029Z ERROR webdriver: RequestError: getaddrinfo ENOTFOUND selenium-server
     depends_on: 
       - selenium-server
-      - sut-in-local
+      - sut-in-cloud
+      - wstunnel-in-cloud
     networks: 
       cloud:
 
-  # To testing in local
-  sut-in-local:
-    build: ./sut
-    ports:
-      - "8001:8080"
-    networks:
-      cloud:
 
 networks:
   cloud:

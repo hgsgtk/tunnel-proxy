@@ -156,3 +156,11 @@ $ curl http://0.0.0.0:3331
 	</body>
 </html>
 ```
+
+### Case3: Using Docker
+
+- launch wstunnel server in private network (to pass request from cloud to SUT)
+
+#### considerations
+
+- The closest thing to what we want to do is for the server to specify the destination from the client, rather than uniformly determining the destination. wstunnel seems to be able to do that.
