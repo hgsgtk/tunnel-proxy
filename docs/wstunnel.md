@@ -7,6 +7,13 @@ Establish a TCP socket tunnel over web socket connection.
 
 ![](./wstunnel_overview.svg)
 
+`wstunnel` defines a customized event "request" between tunnel server and tunnel client. 
+When a request is received from client to server, the server further proxies requests to the destination.
+
+https://github.com/hgsgtk/wstunnel/blob/53cc0adac2816105b3ad17ce416ab107d2975b55/lib/ChainedWebApps.js#L31
+
+It's not a production ready especially in terms of error handling.
+
 ## Install
 
 ```
@@ -54,33 +61,98 @@ Options:
 
 ## Launch
 
-- Start server
+### websocket tunnel server
+
+Run the websocket tunnel server at port 8080 on all interfaces:
 
 ```
-wstunnel -s 0.0.0.0:8080 -t 2.2.2.2:33
+wstunnel -s 0.0.0.0:3330
 ```
 
-- Try to run the websocket tunnel client
+#### considerations
+
+- lock tunnel destination on the server end
+
+> client picks the final tunnel destination, similar to ssh tunnel. Alternatively for security reason, you can lock tunnel destination on the server end
+
+### websocket tunnel client
 
 ```
-$ wstunnel -t 33:2.2.2.2:33 ws://host:8080
+wstunnel -t 3331 ws://0.0.0.0:3330
+```
 
-events.js:288
-      throw er; // Unhandled 'error' event
-      ^
+> In both examples, connection to localhost:33 on client will be tunneled to 2.2.2.2:33 on server via websocket connection in between.
 
-Error: listen EACCES: permission denied 127.0.0.1:33
-    at Server.setupListenHandle [as _listen2] (net.js:1292:21)
-    at listenInCluster (net.js:1357:12)
-    at doListen (net.js:1496:7)
-    at processTicksAndRejections (internal/process/task_queues.js:85:21)
-Emitted 'error' event on Server instance at:
-    at emitErrorNT (net.js:1336:8)
-    at processTicksAndRejections (internal/process/task_queues.js:84:21) {
-  code: 'EACCES',
-  errno: 'EACCES',
-  syscall: 'listen',
-  address: '127.0.0.1',
-  port: 33
-}
+## Try and errors
+
+### Case1: x-websocket-reject-reason: "Unable to determine tunnel target"
+
+- launch websocket tunnel server
+
+```
+wstunnel -s 0.0.0.0:3330
+```
+
+- launch websocket tunnel client
+
+```
+wstunnel -t 3331 ws://0.0.0.0:3330
+```
+
+- send http request by curl
+
+```
+curl http://0.0.0.0:3331
+```
+
+- The websocket tunnel server logged out
+
+```
+[Aug 25 2021 05:29:06.997 GMT+0900] WS connect error: Error: Server responded with a non-101 status: 500 Internal Server Error
+Response Headers Follow:
+connection: close
+x-websocket-reject-reason: "Unable to determine tunnel target"
+
+[Aug 25 2021 05:29:07.006 GMT+0900] HTTP connect error: Error: Http conn rejected, status: 500, msg: "Unable to determine tunnel target"
+[Aug 25 2021 05:29:07.007 GMT+0900] WS connect error: Error: Http conn rejected, status: 500, msg: "Unable to determine tunnel target"
+```
+
+The error `Unable to determine tunnel target` caused when wstunnel server parse a destination url.
+
+https://github.com/hgsgtk/wstunnel/blob/53cc0adac2816105b3ad17ce416ab107d2975b55/lib/WstServer.js#L112
+
+As I explained in case2, we should define both host and port.
+
+### Case2: request passing client -> server
+
+![img.png](wstunnel_client_to_server.png)
+
+- launch websocket tunnel server
+
+```
+node ./bin/wstt.js -s 0.0.0.0:3330 -t example.com:80
+```
+
+- launch websocket tunnel client
+
+```
+node ./bin/wstt.js -t 3331 ws://0.0.0.0:3330
+```
+
+- send http request by curl
+
+```
+$ curl http://0.0.0.0:3331
+
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+		<title>404 - Not Found</title>
+	</head>
+	<body>
+		<h1>404 - Not Found</h1>
+	</body>
+</html>
 ```
