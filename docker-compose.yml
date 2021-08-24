@@ -8,8 +8,10 @@ services:
     build: ./sut
     ports:
       - "8080:8080"
+#    networks:
+#      private:
     networks:
-      private:
+      cloud:
 
   # to proxy request by handling incoming webhook event
   # launch "wstunnel server" to welcome http request to SUT
@@ -19,9 +21,10 @@ services:
       - sut-in-private
     ports:
       - "3330:3330"
-    networks:
-      private:
-
+#    networks:
+#      private:
+    networks: # wstunnel-in-cloudからのホスト名解決及びネットワーク接続を確実に可能にした状況を作るため
+      cloud:
 
   #######
   # cloud environment which is out of private network
