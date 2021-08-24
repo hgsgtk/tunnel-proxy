@@ -7,6 +7,8 @@
     "wstunnel": "mhzed/wstunnel"
   },
   "scripts": {
-    "client": "wstunnel -t 3331 ws://wstunnel-in-private:3330"
+    "client": "wstunnel -t 3331 ws://wstunnel-in-private:3330",
+    "build": "docker build --tag wstunnel-client .",
+    "runDocker": "docker run -p 3331:3331 wstunnel-client"
   }
 }
