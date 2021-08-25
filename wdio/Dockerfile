@@ -6,7 +6,4 @@ ADD . /app
 
 RUN yarn install
 
-# start web socket tunnel client before execution tests
-RUN yarn run client &
-
-ENTRYPOINT ["yarn", "run", "wdioPrivate"]
+ENTRYPOINT ["./docker-entrypoint.sh"]
