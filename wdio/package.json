@@ -5,7 +5,10 @@
     "scripts": {
         "wdioPublicOrLocal": "wdio run ./entrypoint.js --no-autoCompileOpts.autoCompile --spec example.e2e.ts",
         "wdioPrivate": "wdio run ./entrypoint.js --no-autoCompileOpts.autoCompile --spec private.e2e.ts",
-        "chromedriver": "npx chromedriver"
+        "chromedriver": "npx chromedriver",
+        "client": "wstunnel -t 3331 ws://wstunnel-in-private:3330",
+        "buildImage": "docker build --tag tunnel-wdio .",
+        "runDocker": "docker run tunnel-wdio"
     },
     "devDependencies": {
         "@types/jest": "^27.0.1",
@@ -20,6 +23,7 @@
     },
     "dependencies": {
         "@wdio/selenium-standalone-service": "^7.8.0",
-        "@wdio/sync": "^7.9.1"
+        "@wdio/sync": "^7.9.1",
+        "wstunnel": "mhzed/wstunnel"
     }
 }

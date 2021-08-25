@@ -69,6 +69,7 @@ services:
       - selenium-server
       - sut-in-cloud
       - wstunnel-in-cloud
+      - wstunnel-in-private # tmp: wdio container contains wstunnel client process.
     networks: 
       cloud:
 
